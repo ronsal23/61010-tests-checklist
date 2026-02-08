@@ -1,47 +1,137 @@
 body {
-    font-family: sans-serif;
-    background-color: #f4f4f4;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 40px;
+    background-color: #f4f7f6;
+    color: #333;
 }
+
 .container {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    width: 300px;
+    max-width: 1100px;
+    margin: 0 auto;
 }
-ul {
-    list-style-type: none;
-    padding: 0;
+
+h2 {
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 30px;
 }
-li {
-    padding: 10px;
-    border-bottom: 1px solid #ddd;
-    cursor: pointer;
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    table-layout: fixed;
 }
-li.completed {
-    text-decoration: line-through;
-    color: gray;
+
+th,
+td {
+    padding: 12px;
+    border: 1px solid #dee2e6;
+    word-wrap: break-word;
 }
-form {
-    display: flex;
-    margin-top: 20px;
-}
-input[type="text"] {
-    flex-grow: 1;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px 0 0 4px;
-}
-button {
-    padding: 10px;
-    border: none;
-    background-color: #5c67f2;
+
+th {
+    background-color: #007bff;
     color: white;
+    text-transform: uppercase;
+    font-size: 14px;
+}
+
+/* Ширина колонок */
+.col-clause {
+    width: 10%;
+}
+
+.col-name {
+    width: 30%;
+}
+
+.col-verdict {
+    width: 12%;
+}
+
+.col-comments {
+    width: 48%;
+}
+
+tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+select,
+textarea {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-family: inherit;
+}
+
+select {
+    padding: 8px;
+    font-weight: bold;
     cursor: pointer;
-    border-radius: 0 4px 4px 0;
+    transition: all 0.2s ease;
+}
+
+textarea {
+    padding: 8px;
+    resize: vertical;
+    min-height: 40px;
+    display: block;
+}
+
+/* Цветовая индикация вердиктов */
+.v-p {
+    color: #28a745;
+    border-color: #28a745;
+}
+
+.v-f {
+    color: #dc3545;
+    border-color: #dc3545;
+    font-weight: bold;
+}
+
+.v-na {
+    color: #666;
+}
+
+.btn-container {
+    text-align: right;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+button {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 4px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.1s, opacity 0.3s;
+    color: white;
+}
+
+.btn-save {
+    background-color: #28a745;
+}
+
+.btn-load {
+    background-color: #6c757d;
+}
+
+button:active {
+    transform: translateY(2px);
+}
+
+button:hover {
+    opacity: 0.9;
+}
+
+#fileInput {
+    display: none;
 }
