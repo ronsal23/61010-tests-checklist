@@ -13,6 +13,17 @@
     <div class="container">
         <h2>IEC 61010-1 tests</h2>
 
+        <div class="pagination-controls">
+            <label for="itemsPerPage">Show items per page:</label>
+            <select id="itemsPerPage" onchange="handleItemsPerPageChange()">
+                <option value="10">10</option>
+                <option value="20" selected>20</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+            </select>
+            <span id="recordCount"></span>
+        </div>
+
         <table id="checklistTable">
             <thead>
                 <tr>
@@ -22,69 +33,15 @@
                     <th class="col-comments">Comments</th>
                 </tr>
             </thead>
-            <tbody>
-                <tr>
-                    <td>5.4.2</td>
-                    <td>Selection of components</td>
-                    <td>
-                        <select class="v-select" onchange="updateStyle(this)">
-                            <option value="N/A">N/A</option>
-                            <option value="P">P</option>
-                            <option value="F">F</option>
-                        </select>
-                    </td>
-                    <td><textarea placeholder="Введите комментарий..."></textarea></td>
-                </tr>
-                <tr>
-                    <td>6.7.1</td>
-                    <td>Insulation requirements</td>
-                    <td>
-                        <select class="v-select" onchange="updateStyle(this)">
-                            <option value="N/A">N/A</option>
-                            <option value="P">P</option>
-                            <option value="F">F</option>
-                        </select>
-                    </td>
-                    <td><textarea placeholder="Введите комментарий..."></textarea></td>
-                </tr>
-                <tr>
-                    <td>8.2.1</td>
-                    <td>Enclosure rigidity test</td>
-                    <td>
-                        <select class="v-select" onchange="updateStyle(this)">
-                            <option value="N/A">N/A</option>
-                            <option value="P">P</option>
-                            <option value="F">F</option>
-                        </select>
-                    </td>
-                    <td><textarea placeholder="Введите комментарий..."></textarea></td>
-                </tr>
-                <tr>
-                    <td>9.3.2</td>
-                    <td>Current-limiting circuit</td>
-                    <td>
-                        <select class="v-select" onchange="updateStyle(this)">
-                            <option value="N/A">N/A</option>
-                            <option value="P">P</option>
-                            <option value="F">F</option>
-                        </select>
-                    </td>
-                    <td><textarea placeholder="Введите комментарий..."></textarea></td>
-                </tr>
-                <tr>
-                    <td>10.1</td>
-                    <td>Surface temperature limits</td>
-                    <td>
-                        <select class="v-select" onchange="updateStyle(this)">
-                            <option value="N/A">N/A</option>
-                            <option value="P">P</option>
-                            <option value="F">F</option>
-                        </select>
-                    </td>
-                    <td><textarea placeholder="Введите комментарий..."></textarea></td>
-                </tr>
+            <tbody id="tableBody">
             </tbody>
         </table>
+
+        <div class="pagination-nav">
+            <button id="prevBtn" onclick="previousPage()" class="btn-page">← Previous</button>
+            <span id="pageInfo" class="page-info"></span>
+            <button id="nextBtn" onclick="nextPage()" class="btn-page">Next →</button>
+        </div>
 
         <div class="btn-container">
             <input type="file" id="fileInput" accept=".json" onchange="loadData(this)">
