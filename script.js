@@ -185,7 +185,17 @@ function saveData() {
         });
     });
 
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const report = {
+        metadata: {
+            applicant: document.getElementById('applicant').value,
+            equipment: document.getElementById('equipment').value,
+            poNumber: document.getElementById('poNumber').value,
+            testDate: document.getElementById('testDate').value
+        },
+        tests: data
+    };
+
+    const blob = new Blob([JSON.stringify(report, null, 2)], { type: "application/json" });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
     link.download = "IEC_61010_Report.json";
@@ -203,10 +213,19 @@ function loadData(input) {
     const reader = new FileReader();
     reader.onload = function (e) {
         try {
-            const data = JSON.parse(e.target.result);
+            const report = JSON.parse(e.target.result);
             
-            // Update testsData with loaded values
-            data.forEach(item => {
+            // Load metadata
+            if (report.metadata) {
+                document.getElementById('applicant').value = report.metadata.applicant || '';
+                document.getElementById('equipment').value = report.metadata.equipment || '';
+                document.getElementById('poNumber').value = report.metadata.poNumber || '';
+                document.getElementById('testDate').value = report.metadata.testDate || '';
+            }
+            
+            // Load test data
+            const testData = report.tests || report;
+            testData.forEach(item => {
                 const test = testsData.find(t => t.clause === item.clause);
                 if (test) {
                     test.verdict = item.verdict;

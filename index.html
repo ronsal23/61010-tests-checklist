@@ -11,9 +11,38 @@
 <body>
 
     <div class="container">
-        <h2>IEC 61010-1 tests</h2>
+        <h2>IEC 61010-1 Checklist Pro</h2>
 
-        <div class="pagination-controls">
+        <div class="main-content">
+            <div class="left-sidebar">
+                <div class="header-form">
+                    <div class="form-group">
+                        <label for="applicant">Applicant:</label>
+                        <input type="text" id="applicant" placeholder="Enter applicant name">
+                    </div>
+                    <div class="form-group">
+                        <label for="equipment">Equipment under test:</label>
+                        <input type="text" id="equipment" placeholder="Enter equipment description">
+                    </div>
+                    <div class="form-group">
+                        <label for="poNumber">SII PO number:</label>
+                        <input type="text" id="poNumber" placeholder="Enter PO number">
+                    </div>
+                    <div class="form-group">
+                        <label for="testDate">Date:</label>
+                        <input type="date" id="testDate">
+                    </div>
+                </div>
+
+                <div class="btn-container-vertical">
+                    <input type="file" id="fileInput" accept=".json" onchange="loadData(this)">
+                    <button class="btn-load" onclick="document.getElementById('fileInput').click()">Загрузить отчет</button>
+                    <button class="btn-save" onclick="saveData()">Сохранить отчет</button>
+                </div>
+            </div>
+
+            <div class="right-content">
+                <div class="pagination-controls">
             <label for="itemsPerPage">Show items per page:</label>
             <select id="itemsPerPage" onchange="handleItemsPerPageChange()">
                 <option value="10">10</option>
@@ -42,11 +71,7 @@
             <span id="pageInfo" class="page-info"></span>
             <button id="nextBtn" onclick="nextPage()" class="btn-page">Next →</button>
         </div>
-
-        <div class="btn-container">
-            <input type="file" id="fileInput" accept=".json" onchange="loadData(this)">
-            <button class="btn-load" onclick="document.getElementById('fileInput').click()">Загрузить отчет</button>
-            <button class="btn-save" onclick="saveData()">Сохранить отчет</button>
+            </div>
         </div>
     </div>
 
