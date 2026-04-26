@@ -181,15 +181,10 @@ textarea {
 }
 
 /* Цветовая индикация вердиктов */
-.v-p {
+.v-applicable {
     color: #28a745;
     border-color: #28a745;
-}
-
-.v-f {
-    color: #dc3545;
-    border-color: #dc3545;
-    font-weight: bold;
+    font-weight: 600;
 }
 
 .v-na {

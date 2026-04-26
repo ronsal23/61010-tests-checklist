@@ -73,33 +73,74 @@ let currentPage = 1;
 let itemsPerPage = 20;
 
 /**
- * Обновление цвета текста в выпадающем списке Verdict
+ * Verdict/results map for all tests regardless of pagination
+ */
+const testResults = {};
+
+function getDefaultTestResult(test) {
+    return {
+        clause: test.clause,
+        name: test.name,
+        verdict: "N/A",
+        comment: ""
+    };
+}
+
+function getOrCreateResult(test) {
+    if (!testResults[test.clause]) {
+        testResults[test.clause] = getDefaultTestResult(test);
+    }
+    return testResults[test.clause];
+}
+
+/**
+ * Update verdict style
  */
 function updateStyle(el) {
-    el.classList.remove('v-p', 'v-f', 'v-na');
-    if (el.value === 'P') el.classList.add('v-p');
-    else if (el.value === 'F') el.classList.add('v-f');
-    else el.classList.add('v-na');
+    el.classList.remove('v-applicable', 'v-na');
+    if (el.value === 'Applicable') {
+        el.classList.add('v-applicable');
+    } else {
+        el.classList.add('v-na');
+    }
 }
 
 /**
  * Create a table row for a test
  */
 function createTableRow(test) {
+    const result = getOrCreateResult(test);
     const tr = document.createElement('tr');
+    tr.dataset.clause = test.clause;
     tr.innerHTML = `
         <td>${test.clause}</td>
         <td>${test.name}</td>
         <td>
-            <select class="v-select" onchange="updateStyle(this)">
-                <option value="N/A">N/A</option>
-                <option value="P">P</option>
-                <option value="F">F</option>
+            <select class="v-select" onchange="handleVerdictChange(this)">
+                <option value="Applicable" ${result.verdict === 'Applicable' ? 'selected' : ''}>Applicable</option>
+                <option value="N/A" ${result.verdict === 'N/A' ? 'selected' : ''}>N/A</option>
             </select>
         </td>
-        <td><textarea placeholder="Введите комментарий..."></textarea></td>
+        <td><textarea placeholder="Enter comments..." oninput="handleCommentChange(this)">${result.comment || ''}</textarea></td>
     `;
     return tr;
+}
+
+function handleVerdictChange(selectEl) {
+    const row = selectEl.closest('tr');
+    const clause = row.dataset.clause;
+    if (testResults[clause]) {
+        testResults[clause].verdict = selectEl.value;
+    }
+    updateStyle(selectEl);
+}
+
+function handleCommentChange(textareaEl) {
+    const row = textareaEl.closest('tr');
+    const clause = row.dataset.clause;
+    if (testResults[clause]) {
+        testResults[clause].comment = textareaEl.value;
+    }
 }
 
 /**
@@ -108,18 +149,17 @@ function createTableRow(test) {
 function renderTable() {
     const tbody = document.getElementById('tableBody');
     tbody.innerHTML = '';
-    
+
     const start = (currentPage - 1) * itemsPerPage;
     const end = start + itemsPerPage;
     const pageTests = testsData.slice(start, end);
-    
+
     pageTests.forEach(test => {
         tbody.appendChild(createTableRow(test));
     });
-    
-    // Re-initialize styles for newly created selects
+
     document.querySelectorAll('.v-select').forEach(updateStyle);
-    
+
     updatePaginationControls();
 }
 
@@ -132,10 +172,10 @@ function updatePaginationControls() {
     const prevBtn = document.getElementById('prevBtn');
     const nextBtn = document.getElementById('nextBtn');
     const recordCount = document.getElementById('recordCount');
-    
+
     pageInfo.textContent = `Page ${currentPage} of ${totalPages} (Total: ${testsData.length} tests)`;
     recordCount.textContent = `Total: ${testsData.length} tests`;
-    
+
     prevBtn.disabled = currentPage === 1;
     nextBtn.disabled = currentPage === totalPages;
 }
@@ -170,19 +210,63 @@ function handleItemsPerPageChange() {
     renderTable();
 }
 
+function createDownloadLink(content, mimeType, filename) {
+    const blob = new Blob([content], { type: mimeType });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    return link;
+}
+
+function triggerDownloads(downloadItems) {
+    downloadItems.forEach((item, index) => {
+        setTimeout(() => {
+            const link = createDownloadLink(item.content, item.mimeType, item.filename);
+            link.click();
+            URL.revokeObjectURL(link.href);
+            link.remove();
+        }, index * 250);
+    });
+}
+
+function buildTextReport(report) {
+    const clauseWidth = 10;
+    const verdictWidth = 12;
+
+    const pad = (value, width) => String(value || '').padEnd(width, ' ');
+
+    const lines = [
+        'IEC 61010-1 Checklist Report',
+        `Applicant: ${report.metadata.applicant || ''}`,
+        `Equipment under test: ${report.metadata.equipment || ''}`,
+        `SII PO number: ${report.metadata.poNumber || ''}`,
+        `Date: ${report.metadata.testDate || ''}`,
+        '',
+        'Tests:',
+        `${pad('Clause', clauseWidth)} | ${pad('Verdict', verdictWidth)} | Comment`,
+        `${'-'.repeat(clauseWidth)}-+-${'-'.repeat(verdictWidth)}-+-${'-'.repeat(50)}`
+    ];
+
+    report.tests.forEach(test => {
+        lines.push(`${pad(test.clause, clauseWidth)} | ${pad(test.verdict, verdictWidth)} | ${test.comment || ''}`);
+    });
+
+    return lines.join('\n');
+}
+
 /**
- * Сбор данных из таблицы и сохранение в JSON-файл
+ * Collect data and save as JSON and TXT files
  */
 function saveData() {
-    const rows = document.querySelectorAll("#checklistTable tbody tr");
-    const data = [];
-
-    rows.forEach(row => {
-        data.push({
-            clause: row.cells[0].innerText,
-            verdict: row.cells[2].querySelector('select').value,
-            comment: row.cells[3].querySelector('textarea').value
-        });
+    const allTests = testsData.map(test => {
+        const result = getOrCreateResult(test);
+        return {
+            clause: result.clause,
+            verdict: result.verdict,
+            comment: result.comment
+        };
     });
 
     const report = {
@@ -192,19 +276,25 @@ function saveData() {
             poNumber: document.getElementById('poNumber').value,
             testDate: document.getElementById('testDate').value
         },
-        tests: data
+        tests: allTests
     };
 
-    const blob = new Blob([JSON.stringify(report, null, 2)], { type: "application/json" });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "IEC_61010_Report.json";
-    link.click();
-    URL.revokeObjectURL(link.href);
+    triggerDownloads([
+        {
+            content: JSON.stringify(report, null, 2),
+            mimeType: 'application/json',
+            filename: 'IEC_61010_Report.json'
+        },
+        {
+            content: buildTextReport(report),
+            mimeType: 'text/plain',
+            filename: 'IEC_61010_Report.txt'
+        }
+    ]);
 }
 
 /**
- * Загрузка данных из выбранного JSON-файла
+ * Load data from selected JSON file
  */
 function loadData(input) {
     const file = input.files[0];
@@ -214,37 +304,47 @@ function loadData(input) {
     reader.onload = function (e) {
         try {
             const report = JSON.parse(e.target.result);
-            
-            // Load metadata
+
             if (report.metadata) {
                 document.getElementById('applicant').value = report.metadata.applicant || '';
                 document.getElementById('equipment').value = report.metadata.equipment || '';
                 document.getElementById('poNumber').value = report.metadata.poNumber || '';
                 document.getElementById('testDate').value = report.metadata.testDate || '';
             }
-            
-            // Load test data
-            const testData = report.tests || report;
-            testData.forEach(item => {
-                const test = testsData.find(t => t.clause === item.clause);
-                if (test) {
-                    test.verdict = item.verdict;
-                    test.comment = item.comment;
+
+            testsData.forEach(test => {
+                testResults[test.clause] = getDefaultTestResult(test);
+            });
+
+            const loadedTests = report.tests || report;
+            loadedTests.forEach(item => {
+                const existing = testResults[item.clause];
+                if (existing) {
+                    existing.verdict = item.verdict === 'Applicable' ? 'Applicable' : 'N/A';
+                    existing.comment = item.comment || '';
                 }
             });
-            
+
             renderTable();
-            alert("Данные успешно загружены из файла!");
+            alert('Data loaded successfully.');
         } catch (err) {
             console.error(err);
-            alert("Ошибка при чтении файла. Убедитесь, что выбрали правильный .json файл отчета.");
+            alert('Error reading file. Make sure you selected a valid report .json file.');
         }
-        input.value = ''; // Сброс, чтобы можно было загрузить тот же файл снова
+        input.value = '';
     };
     reader.readAsText(file);
 }
 
-// Инициализация при загрузке страницы
+// Initialize data at startup
+function initializeTestResults() {
+    testsData.forEach(test => {
+        testResults[test.clause] = getDefaultTestResult(test);
+    });
+}
+
+// Initialization on page load
 document.addEventListener('DOMContentLoaded', () => {
+    initializeTestResults();
     renderTable();
 });

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
@@ -30,14 +30,14 @@
                     </div>
                     <div class="form-group">
                         <label for="testDate">Date:</label>
-                        <input type="date" id="testDate">
+                        <input type="text" id="testDate" placeholder="dd/mm/yyyy" pattern="\d{2}/\d{2}/\d{4}">
                     </div>
                 </div>
 
                 <div class="btn-container-vertical">
                     <input type="file" id="fileInput" accept=".json" onchange="loadData(this)">
-                    <button class="btn-load" onclick="document.getElementById('fileInput').click()">Загрузить отчет</button>
-                    <button class="btn-save" onclick="saveData()">Сохранить отчет</button>
+                    <button class="btn-load" onclick="document.getElementById('fileInput').click()">Upload list</button>
+                    <button class="btn-save" onclick="saveData()">Save list</button>
                 </div>
             </div>
 
